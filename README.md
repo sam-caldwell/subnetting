@@ -52,3 +52,4 @@ in golang.
 > 13. The "subnet" string is added to the `subnets` slice.
 > 14. Finally, the function returns the `subnets` slice and a nil error
       > if everything executed successfully.
+
