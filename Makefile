@@ -4,3 +4,7 @@ clean:
 
 build: clean
 	@go build -o build/calculateSubnets ./cmd/calculateSubnets/main.go
+
+
+test:
+	@go test -v ./...

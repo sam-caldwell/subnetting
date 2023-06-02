@@ -6,7 +6,7 @@ import (
 )
 
 // CalculateSubnets calculates subnets based on a parentCIDR and subnetSize
-func CalculateSubnets(parentCIDR string, subnetSize int) ([]string, error) {
+func CalculateSubnets(parentCIDR string, subnetSize int) (subnets []string, err error) {
 
 	_, ipNet, err := net.ParseCIDR(parentCIDR)
 	if err != nil {
@@ -25,15 +25,14 @@ func CalculateSubnets(parentCIDR string, subnetSize int) ([]string, error) {
 	// Calculate the number of subnets within the /16 range
 	numSubnets := 1 << (subnetSize - ones)
 
-	subnets := make([]string, numSubnets)
+	//subnets := make([]string, numSubnets)
 	for i := 0; i < numSubnets; i++ {
 
 		// Calculate the subnet IP by adding the subnet index to the start IP
 		subnetIP := startIP + uint(i<<(32-subnetSize))
 
 		// Convert the subnet IP back to the IP format
-		subnet := fmt.Sprintf(MsgIpv4CIDR, ip[0], ip[1], subnetIP>>8, subnetIP&0xFF, subnetSize)
-		subnets[i] = subnet
+		subnets = append(subnets, fmt.Sprintf(MsgIpv4CIDR, ip[0], ip[1], subnetIP>>8, subnetIP&0xFF, subnetSize))
 
 	}
 	return subnets, nil
