@@ -50,7 +50,7 @@ jobs:
           mkdir -p debian/DEBIAN
           touch debian/DEBIAN/control
           echo "Package: calculateSubnets" >> debian/DEBIAN/control
-          echo "Version: $(date +%Y).$(date +%s)" >> debian/DEBIAN/control
+          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
           echo "Architecture: amd64" >> debian/DEBIAN/control
           echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
           echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
@@ -75,7 +75,7 @@ jobs:
           mkdir -p debian/DEBIAN
           touch debian/DEBIAN/control
           echo "Package: calculateSubnets" >> debian/DEBIAN/control
-          echo "Version: $(date +%Y).$(date +%s)" >> debian/DEBIAN/control
+          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
           echo "Architecture: arm64" >> debian/DEBIAN/control
           echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
           echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
