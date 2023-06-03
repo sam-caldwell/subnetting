@@ -25,13 +25,49 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Install dependencies
-        run:  go mod download -x
+        run: go mod download -x
 
       - name: Test with Go
-        run: go test -json > TestResults-${{ matrix.go-version }}.json
+        run: go test -json ./... > TestResults-${{ matrix.go-version }}.json
 
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:
-          name: Go-results-${{ matrix.go-version }}
+          name: Go-test-results-${{ matrix.go-version }}
           path: TestResults-${{ matrix.go-version }}.json
+
+      - name: Build with go (linux amd64)
+        run: |
+          mkdir -p build/linux/amd64/${{ matrix.go-version }}/
+          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (linux arm64)
+        run: |
+          mkdir -p build/linux/arm64/${{ matrix.go-version }}/
+          GOOS=linux GOARCH=arm64 go build -o build/linux/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (windows amd64)
+        run: |
+          mkdir -p build/windows/amd64/${{ matrix.go-version }}/
+          GOOS=windows GOARCH=amd64 go build -o build/windows/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (windows arm64)
+        run: |
+          mkdir -p build/windows/arm64/${{ matrix.go-version }}/
+          GOOS=windows GOARCH=arm64 go build -o build/windows/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (darwin amd64)
+        run: |
+          mkdir -p build/darwin/amd64/${{ matrix.go-version }}/
+          GOOS=darwin GOARCH=amd64 go build -o build/darwin/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (darwin arm64)
+        run: |
+          mkdir -p build/darwin/arm64/${{ matrix.go-version }}/
+          GOOS=darwin GOARCH=arm64 go build -o build/darwin/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Upload Go test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-upload-${{ matrix.go-version }}
+          path: build/
