@@ -71,7 +71,7 @@ jobs:
           echo "::set-output name=version::$(date +%Y).$(date +%m)$(date +%d).$(date +%s)"
 
       - name: Create Release (amd64)
-        id: create_release
+        id: create_release_amd64
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,7 +111,7 @@ jobs:
           dpkg-deb --build debian
 
       - name: Create Release (arm64)
-        id: create_release
+        id: create_release_arm64
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
