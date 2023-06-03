@@ -49,12 +49,7 @@ jobs:
       - name: Build with go (windows amd64)
         run: |
           mkdir -p build/windows/amd64/${{ matrix.go-version }}/
-          GOOS=windows GOARCH=amd64 go build -o build/windows/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
-
-      - name: Build with go (windows arm64)
-        run: |
-          mkdir -p build/windows/arm64/${{ matrix.go-version }}/
-          GOOS=windows GOARCH=arm64 go build -o build/windows/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+          GOOS=windows GOARCH=amd64 go build -o build/windows/amd64/${{ matrix.go-version }}/calculateSubnets.exe ./cmd/calculateSubnets/main.go
 
       - name: Build with go (darwin amd64)
         run: |
