@@ -42,7 +42,7 @@ jobs:
       - name: Set Release Version
         id: set_version
         run: |
-          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)"
+          echo "::set-output name=version::$(date +%s)-${{ matrix.go-opsys }}-${{ matrix.go-arch }}"
 
 
       - name: Create Debian/Ubuntu Package
