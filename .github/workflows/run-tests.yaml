@@ -26,3 +26,31 @@ jobs:
       - name: Test with Go
         run: |
           go test -json ./...
+
+  broad-spectrum-builds:
+    runs-on: ubuntu-latest
+    needs: run-all-tests
+    strategy:
+      matrix:
+        go-version: ['1.17', '1.18', '1.19', '1.20']
+        go-arch: ['amd64', 'arm64']
+        go-opsys: ['linux', 'darwin']
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install dependencies
+        run: go mod download -x
+
+      - name: Build with go
+        run: |
+          mkdir -p build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
+          GOOS=${{ matrix.go-opsys }} \
+          GOARCH=${{ matrix.go-arch }} \
+            go build -o build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
