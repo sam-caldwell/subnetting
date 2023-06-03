@@ -74,14 +74,17 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: subnetting-${{ steps.set_version.outputs.version }}
-          path: *.deb
-
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: subnetting-${{ steps.set_version.outputs.version }}
-          path: *.rpm
+      - name: List files
+        run: ls -la
+#
+#      - name: Publish Artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: subnetting-${{ steps.set_version.outputs.version }}
+#          path: *.deb
+#
+#      - name: Publish Artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: subnetting-${{ steps.set_version.outputs.version }}
+#          path: *.rpm
