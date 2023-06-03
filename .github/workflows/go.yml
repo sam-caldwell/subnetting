@@ -33,82 +33,6 @@ jobs:
       - name: Test with Go
         run: go test -json ./... > TestResults-${{ matrix.go-version }}.json
 
-      - name: Upload Go test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: Go-test-results-${{ matrix.go-version }}
-          path: TestResults-${{ matrix.go-version }}.json
-
-      - name: Set Release Version
-        id: set_version
-        run: |
-          echo "::set-output name=version::$(date +%Y).$(date +%m)$(date +%d).$(date +%s)"
-
-      - name: Build with go (linux amd64)
-        run: |
-          mkdir -p build/linux/amd64/${{ matrix.go-version }}/
-          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
-
-      - name: Create Debian/Ubuntu Package
-        run: |
-          cd build/linux/amd64/${{ matrix.go-version }}
-          mkdir -p debian/DEBIAN
-          touch debian/DEBIAN/control
-          echo "Package: calculateSubnets" >> debian/DEBIAN/control
-          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
-          echo "Architecture: amd64" >> debian/DEBIAN/control
-          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
-          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
-          mkdir -p debian/usr/bin
-          cp calculateSubnets debian/usr/bin
-          dpkg-deb --build debian
-
-      - name: Create Release (amd64)
-        id: create_release_amd64
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
-          release_name: Release ${{ steps.set_version.outputs.version }}
-          body: |
-            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
-          draft: false
-          prerelease: false
-#          files: build/linux/amd64/${{ matrix.go-version }}/debian.deb
-
-      - name: Publish Artifact (Ubuntu .deb package)
-        uses: actions/upload-artifact@v2
-        with:
-          name: deb-package
-          path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
-
-
-      - name: Build with go (linux arm64)
-        run: |
-          mkdir -p build/linux/arm64/${{ matrix.go-version }}/
-          GOOS=linux GOARCH=arm64 go build -o build/linux/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
-
-      - name: Publish Artifact (Ubuntu .deb package)
-        uses: actions/upload-artifact@v2
-        with:
-          name: deb-package
-          path: build/linux/arm64/${{ matrix.go-version }}/debian.deb
-
-      - name: Create Debian/Ubuntu Package
-        run: |
-          cd build/linux/arm64/${{ matrix.go-version }}
-          mkdir -p debian/DEBIAN
-          touch debian/DEBIAN/control
-          echo "Package: calculateSubnets" >> debian/DEBIAN/control
-          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
-          echo "Architecture: arm64" >> debian/DEBIAN/control
-          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
-          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
-          mkdir -p debian/usr/bin
-          cp calculateSubnets debian/usr/bin
-          dpkg-deb --build debian
-
       - name: Build with go (windows amd64)
         run: |
           mkdir -p build/windows/amd64/${{ matrix.go-version }}/
@@ -124,8 +48,72 @@ jobs:
           mkdir -p build/darwin/arm64/${{ matrix.go-version }}/
           GOOS=darwin GOARCH=arm64 go build -o build/darwin/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
 
-      - name: Upload Go test results
-        uses: actions/upload-artifact@v3
+      - name: Build with go (linux amd64)
+        run: |
+          mkdir -p build/linux/amd64/${{ matrix.go-version }}/
+          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Build with go (linux arm64)
+        run: |
+          mkdir -p build/linux/arm64/${{ matrix.go-version }}/
+          GOOS=linux GOARCH=arm64 go build -o build/linux/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Create Debian/Ubuntu Package (amd64)
+        run: |
+          cd build/linux/amd64/${{ matrix.go-version }}
+          mkdir -p debian/DEBIAN
+          touch debian/DEBIAN/control
+          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
+          echo "Architecture: amd64" >> debian/DEBIAN/control
+          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
+          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
+          mkdir -p debian/usr/bin
+          cp calculateSubnets debian/usr/bin
+          dpkg-deb --build debian
+          cp debian.deb subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+
+      - name: Create Debian/Ubuntu Package (arm64)
+        run: |
+          cd build/linux/arm64/${{ matrix.go-version }}
+          mkdir -p debian/DEBIAN
+          touch debian/DEBIAN/control
+          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
+          echo "Architecture: arm64" >> debian/DEBIAN/control
+          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
+          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
+          mkdir -p debian/usr/bin
+          cp calculateSubnets debian/usr/bin
+          dpkg-deb --build debian
+          cp debian.deb subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+
+      - name: Set Release Version
+        id: set_version
+        run: |
+          echo "::set-output name=version::${{ matrix.go-version }}.$(date +%Y%m)$(date +%s).$(date +%s)"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: artifacts-upload-${{ matrix.go-version }}
-          path: build/
+          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
+          release_name: Release ${{ steps.set_version.outputs.version }}
+          body: |
+            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
+          draft: false
+          prerelease: false
+
+      - name: Publish Artifact (Ubuntu amd64 .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/amd64/${{ matrix.go-version }}/subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+
+      - name: Publish Artifact (Ubuntu arm64 .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/arm64/${{ matrix.go-version }}/subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
