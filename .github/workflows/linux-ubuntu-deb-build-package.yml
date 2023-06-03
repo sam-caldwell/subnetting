@@ -100,10 +100,10 @@ jobs:
 
       - name: Publish Debian/Ubuntu Package
         run: |
-          echo "registry=https://npm.pkg.github.com/${{ github.repository }}" >> debian/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> debian/.npmrc
-          echo "name=\${{ github.repository }}" >> debian/.npmrc
-          echo "version=${{ matrix.go-version }}.$(date +%s)" >> debian/.npmrc
-          echo "dist-tags.latest=latest" >> debian/.npmrc
-          echo "access=public" >> debian/.npmrc
+          echo "registry=https://npm.pkg.github.com/${{ github.repository }}" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "name=\${{ github.repository }}" >> ~/.npmrc
+          echo "version=${{ matrix.go-version }}.$(date +%s)" >> ~/.npmrc
+          echo "dist-tags.latest=latest" >> ~/.npmrc
+          echo "access=public" >> ~/.npmrc
           npm publish debian
