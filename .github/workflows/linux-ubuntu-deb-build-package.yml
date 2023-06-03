@@ -70,7 +70,7 @@ jobs:
             exit 3
           }
           ls -la
-          cp debian.deb subnetting-${{ steps.set_version.outputs.version }}.deb
+          cp debian.deb ../subnetting-${{ steps.set_version.outputs.version }}.deb
           ls -la
           pwd
 
@@ -91,4 +91,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: subnetting-${{ steps.set_version.outputs.version }}.deb
-          path: build/subnetting-${{ steps.set_version.outputs.version }}.deb
+          path: subnetting-${{ steps.set_version.outputs.version }}.deb
