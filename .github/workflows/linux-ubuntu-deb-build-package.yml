@@ -92,3 +92,18 @@ jobs:
         with:
           name: subnetting-${{ steps.set_version.outputs.version }}.deb
           path: subnetting-${{ steps.set_version.outputs.version }}.deb
+
+
+      - name: Configure GitHub Packages registry
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      - name: Publish Debian/Ubuntu Package
+        run: |
+          echo "registry=https://npm.pkg.github.com/${{ github.repository }}" >> debian/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> debian/.npmrc
+          echo "name=\${{ github.repository }}" >> debian/.npmrc
+          echo "version=${{ matrix.go-version }}.$(date +%s)" >> debian/.npmrc
+          echo "dist-tags.latest=latest" >> debian/.npmrc
+          echo "access=public" >> debian/.npmrc
+          npm publish debian
