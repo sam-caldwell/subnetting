@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ '1.20' ]
-        go-arch: [ 'amd64', 'arm64' ]
-        go-opsys: [ 'linux' ]
+        go-version: ['1.17', '1.18', '1.19', '1.20']
+        go-arch: ['amd64', 'arm64']
+        go-opsys: ['linux', 'darwin']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -56,11 +56,10 @@ jobs:
 
       - name: Build with go
         run: |
-          mkdir -p build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
+          mkdir -p build/
           GOOS=${{ matrix.go-opsys }} \
           GOARCH=${{ matrix.go-arch }} \
-            go build -o build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/calculateSubnets \
-              ./cmd/calculateSubnets/main.go
+            go build -o build/calculateSubnets ./cmd/calculateSubnets/main.go
 
       - name: Create Debian/Ubuntu Package
         run: |
@@ -76,8 +75,8 @@ jobs:
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
           ls -la
-          cp debian.deb ../../../subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
-          ls ../../../
+          cp debian.deb subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
+          ls -la
           pwd
 
       - name: Set Release Version
@@ -102,4 +101,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
-          path: subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
+          path: build/subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
