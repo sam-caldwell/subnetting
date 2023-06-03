@@ -1,0 +1,36 @@
+---
+name: Run Tests
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  GO111MODULE: "on"
+
+jobs:
+  run-all-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-arch: [ 'amd64', 'arm64' ]
+        go-opsys: [ 'linux', 'darwin' ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install dependencies
+        run: go mod download -x
+
+      - name: Test with Go
+        run: |
+          GOOS=${{ matrix.go-opsys }} GOARCH=${{ matrix.go-arch }} \
+          go test -json ./... > TestResults-${{ matrix.go-version }}.json
