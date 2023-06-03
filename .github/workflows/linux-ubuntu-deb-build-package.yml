@@ -90,5 +90,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
+          name: Debian/Ubuntu Package subnetting-${{ steps.set_version.outputs.version }}
           path: build/subnetting-${{ steps.set_version.outputs.version }}.deb
