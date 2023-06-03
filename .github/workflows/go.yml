@@ -63,7 +63,6 @@ jobs:
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
 
-
       - name: Create Release (amd64)
         id: create_release_amd64
         uses: actions/create-release@v1
@@ -109,20 +108,6 @@ jobs:
           mkdir -p debian/usr/bin
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
-
-      - name: Create Release (arm64)
-        id: create_release_arm64
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
-          release_name: Release ${{ steps.set_version.outputs.version }}
-          body: |
-            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
-          draft: false
-          prerelease: false
-          files: build/linux/arm64/${{ matrix.go-version }}/debian.deb
 
       - name: Build with go (windows amd64)
         run: |
