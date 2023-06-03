@@ -64,7 +64,6 @@ jobs:
           name: deb-package
           path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
 
-
       - name: Set Release Version
         id: set_version
         run: |
@@ -82,8 +81,7 @@ jobs:
             This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
           draft: false
           prerelease: false
-          files: |
-            build/linux/amd64/${{ matrix.go-version }}/debian.deb
+          files: build/linux/amd64/${{ matrix.go-version }}/debian.deb
 
       - name: Build with go (linux arm64)
         run: |
@@ -122,8 +120,7 @@ jobs:
             This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
           draft: false
           prerelease: false
-          files: |
-            build/linux/arm64/${{ matrix.go-version }}/debian.deb
+          files: build/linux/arm64/${{ matrix.go-version }}/debian.deb
 
       - name: Build with go (windows amd64)
         run: |
