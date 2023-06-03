@@ -1,0 +1,10 @@
+meta:
+  description: Subnetting Tools
+  vendor: Sam Caldwell <mail@samcaldwell.net>
+  maintainer:  Sam Caldwell <mail@samcaldwell.net>
+files:
+  "/usr/bin/calculateSubnets":
+    file: calculateSubnets
+    mode: "0755"
+    user: "root"
+    keep: true

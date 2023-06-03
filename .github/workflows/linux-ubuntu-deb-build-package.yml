@@ -45,34 +45,21 @@ jobs:
           echo "::set-output name=version::$(date +%s)-${{ matrix.go-opsys }}-${{ matrix.go-arch }}"
 
 
-      - name: Create Debian/Ubuntu Package
-        run: |
-          set -e
-          cd build/
-          mkdir -p debian/DEBIAN
-          mkdir -p debian/usr/bin
-          touch debian/DEBIAN/control || {
-            echo 'touch failed'
-            exit 1
-          }
-          echo "Package: calculateSubnets"                         >> debian/DEBIAN/control
-          echo "Version: ${{ steps.set_version.outputs.version }}" >> debian/DEBIAN/control
-          echo "Architecture: ${{ matrix.go-arch }}"               >> debian/DEBIAN/control
-          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>"   >> debian/DEBIAN/control
-          echo "Description: calculateSubnets binary"              >> debian/DEBIAN/control
-          ls -la debian/DEBIAN/
-          cp calculateSubnets debian/usr/bin || {
-            echo 'copy binary failed' 
-            exit 2
-          }
-          dpkg-deb --build debian || {
-            echo 'dpkg-deb failed' 
-            exit 3
-          }
-          ls -la
-          cp debian.deb ../subnetting-${{ steps.set_version.outputs.version }}.deb
-          ls -la
-          pwd
+      - uses: kentik/pkg@v1
+        with:
+          name: subnetting-${{ steps.set_version.outputs.version }}.deb
+          version: ${{ steps.set_version.outputs.version }}
+          arch: x86_64
+          format: deb
+          package: package-deb.yaml
+
+      - uses: kentik/pkg@v1
+        with:
+          name: my-package
+          version: 0.0.1
+          arch: x86_64
+          format: rpm
+          package: package-deb.yaml
 
       - name: Create Release
         id: create_release
@@ -90,20 +77,11 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: subnetting-${{ steps.set_version.outputs.version }}.deb
-          path: subnetting-${{ steps.set_version.outputs.version }}.deb
+          name: subnetting-${{ steps.set_version.outputs.version }}
+          path: *.deb
 
-
-      - name: Configure GitHub Packages registry
-        run: |
-          echo "//registry.npmjs.org/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-
-      - name: Publish Debian/Ubuntu Package
-        run: |
-          echo "registry=https://npm.pkg.github.com/${{ github.repository }}" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=\${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-          echo "name=\${{ github.repository }}" >> ~/.npmrc
-          echo "version=${{ matrix.go-version }}.$(date +%s)" >> ~/.npmrc
-          echo "dist-tags.latest=latest" >> ~/.npmrc
-          echo "access=public" >> ~/.npmrc
-          npm publish debian
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: subnetting-${{ steps.set_version.outputs.version }}
+          path: *.rpm
