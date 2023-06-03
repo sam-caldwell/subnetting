@@ -64,17 +64,18 @@ jobs:
 
       - name: Create Debian/Ubuntu Package
         run: |
-          cd build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
+          cd build/
           mkdir -p debian/DEBIAN
-          touch debian/DEBIAN/control
-          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Package: calculateSubnets" > debian/DEBIAN/control
           echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
           echo "Architecture: ${{ matrix.go-arch }}" >> debian/DEBIAN/control
           echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
           echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
           mkdir -p debian/usr/bin
+          ls -la
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
+          ls -la
           cp debian.deb ../../../subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
           ls ../../../
           pwd
