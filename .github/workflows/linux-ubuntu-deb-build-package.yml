@@ -17,7 +17,7 @@ jobs:
     needs: run-all-tests
     strategy:
       matrix:
-        go-version: ['1.17', '1.18', '1.19', '1.20']
+        go-version: ['1.20']
         go-arch: ['amd64', 'arm64']
         go-opsys: ['linux']
 
@@ -61,7 +61,7 @@ jobs:
       - name: Set Release Version
         id: set_version
         run: |
-          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.${{ matrix.go-version }}.$(date +%s)"
+          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)"
 
       - name: Create Release
         id: create_release
@@ -80,4 +80,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
-          path: subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}.deb
+          path: subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
