@@ -64,10 +64,37 @@ jobs:
           name: deb-package
           path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
 
+
+      - name: Set Release Version
+        id: set_version
+        run: |
+          echo "::set-output name=version::$(date +%Y).$(date +%m)$(date +%d).$(date +%s)"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
+          release_name: Release ${{ steps.set_version.outputs.version }}
+          body: |
+            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
+          draft: false
+          prerelease: false
+          files: |
+            build/linux/amd64/${{ matrix.go-version }}/debian.deb
+
       - name: Build with go (linux arm64)
         run: |
           mkdir -p build/linux/arm64/${{ matrix.go-version }}/
           GOOS=linux GOARCH=arm64 go build -o build/linux/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Publish Artifact (Ubuntu .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/arm64/${{ matrix.go-version }}/debian.deb
 
       - name: Create Debian/Ubuntu Package
         run: |
@@ -83,11 +110,20 @@ jobs:
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
 
-      - name: Publish Artifact (Ubuntu .deb package)
-        uses: actions/upload-artifact@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: deb-package
-          path: build/linux/arm64/${{ matrix.go-version }}/debian.deb
+          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
+          release_name: Release ${{ steps.set_version.outputs.version }}
+          body: |
+            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
+          draft: false
+          prerelease: false
+          files: |
+            build/linux/arm64/${{ matrix.go-version }}/debian.deb
 
       - name: Build with go (windows amd64)
         run: |
