@@ -38,12 +38,19 @@ jobs:
           GOARCH=${{ matrix.go-arch }} \
             go build -o build/calculateSubnets ./cmd/calculateSubnets/main.go
 
+
+      - name: Set Release Version
+        id: set_version
+        run: |
+          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)"
+
+
       - name: Create Debian/Ubuntu Package
         run: |
           cd build/
           mkdir -p debian/DEBIAN
           echo "Package: calculateSubnets" > debian/DEBIAN/control
-          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
+          echo "Version: ${{ steps.set_version.outputs.version }}" >> debian/DEBIAN/control
           echo "Architecture: ${{ matrix.go-arch }}" >> debian/DEBIAN/control
           echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
           echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
@@ -56,14 +63,9 @@ jobs:
             echo 'dpkg-deb failed' && exit 1
           }
           ls -la
-          cp debian.deb subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
+          cp debian.deb subnetting-${{ steps.set_version.outputs.version }}.deb
           ls -la
           pwd
-
-      - name: Set Release Version
-        id: set_version
-        run: |
-          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)"
 
       - name: Create Release
         id: create_release
@@ -82,4 +84,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
-          path: build/subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
+          path: build/subnetting-${{ steps.set_version.outputs.version }}.deb
