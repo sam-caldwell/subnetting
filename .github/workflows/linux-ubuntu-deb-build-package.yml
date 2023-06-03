@@ -51,7 +51,10 @@ jobs:
           cd build/
           mkdir -p debian/DEBIAN
           mkdir -p debian/usr/bin
-          touch debian/DEBIAN/control || {echo 'touch failed' && exit 1}
+          touch debian/DEBIAN/control || {
+            echo 'touch failed'
+            exit 1
+          }
           echo "Package: calculateSubnets"                         >> debian/DEBIAN/control
           echo "Version: ${{ steps.set_version.outputs.version }}" >> debian/DEBIAN/control
           echo "Architecture: ${{ matrix.go-arch }}"               >> debian/DEBIAN/control
@@ -59,10 +62,12 @@ jobs:
           echo "Description: calculateSubnets binary"              >> debian/DEBIAN/control
           ls -la debian/DEBIAN/
           cp calculateSubnets debian/usr/bin || {
-            echo 'copy binary failed' && exit 1
+            echo 'copy binary failed' 
+            exit 2
           }
           dpkg-deb --build debian || {
-            echo 'dpkg-deb failed' && exit 1
+            echo 'dpkg-deb failed' 
+            exit 3
           }
           ls -la
           cp debian.deb subnetting-${{ steps.set_version.outputs.version }}.deb
