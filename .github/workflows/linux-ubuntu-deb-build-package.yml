@@ -13,7 +13,6 @@ env:
 jobs:
   pre-check-test:
     runs-on: ubuntu-latest
-    needs: run-all-tests
     strategy:
       matrix:
         go-version: [ '1.20' ]
