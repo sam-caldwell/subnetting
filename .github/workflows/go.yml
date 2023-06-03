@@ -39,6 +39,11 @@ jobs:
           name: Go-test-results-${{ matrix.go-version }}
           path: TestResults-${{ matrix.go-version }}.json
 
+      - name: Set Release Version
+        id: set_version
+        run: |
+          echo "::set-output name=version::$(date +%Y).$(date +%m)$(date +%d).$(date +%s)"
+
       - name: Build with go (linux amd64)
         run: |
           mkdir -p build/linux/amd64/${{ matrix.go-version }}/
@@ -58,16 +63,6 @@ jobs:
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
 
-      - name: Publish Artifact (Ubuntu .deb package)
-        uses: actions/upload-artifact@v2
-        with:
-          name: deb-package
-          path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
-
-      - name: Set Release Version
-        id: set_version
-        run: |
-          echo "::set-output name=version::$(date +%Y).$(date +%m)$(date +%d).$(date +%s)"
 
       - name: Create Release (amd64)
         id: create_release_amd64
@@ -81,7 +76,14 @@ jobs:
             This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
           draft: false
           prerelease: false
-          files: build/linux/amd64/${{ matrix.go-version }}/debian.deb
+#          files: build/linux/amd64/${{ matrix.go-version }}/debian.deb
+
+      - name: Publish Artifact (Ubuntu .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
+
 
       - name: Build with go (linux arm64)
         run: |
