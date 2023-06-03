@@ -56,7 +56,7 @@ jobs:
           mkdir -p debian/usr/bin
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
-          cp debian.deb ../../../subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+          cp debian.deb ../../../subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}.deb
           ls ../../../
           pwd
 
@@ -81,5 +81,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: deb-package
-          path: subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+          name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
+          path: subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}.deb
