@@ -6,6 +6,9 @@ Subnetting Tools
 A simple set of tools for working with subnets
 in golang.
 
+## Status
+[![Go](https://github.com/sam-caldwell/subnetting/actions/workflows/go.yml/badge.svg)](https://github.com/sam-caldwell/subnetting/actions/workflows/go.yml)
+
 ## Commands
 
 ### calculateSubnets
