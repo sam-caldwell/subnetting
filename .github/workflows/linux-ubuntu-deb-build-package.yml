@@ -1,13 +1,11 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go
+---
+name: Linux Ubuntu Debian Build and Package
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   GO111MODULE: "on"
@@ -18,68 +16,70 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ '1.17', '1.18', '1.19', '1.20' ]
-        go-arch: [ 'amd64','arm64' ]
-        go-opsys: [ 'linux' ]
+        go-version: ['1.17', '1.18', '1.19', '1.20']
+        go-arch: ['amd64', 'arm64']
+        go-opsys: ['linux']
 
     steps:
-      - uses: actions/checkout@v3
-          - name: Setup Go
-            uses: actions/setup-go@v4
-            with:
-              go-version: ${{ matrix.go-version }}
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-          - name: Install dependencies
-            run: go mod download -x
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
 
-          - name: Test with Go
-            run: go test -json ./... > TestResults-${{ matrix.go-version }}.json
+      - name: Install dependencies
+        run: go mod download -x
 
-          - name: Build with go
-            run: |
-              mkdir -p build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
-              GOOS=${{ matrix.go-opsys }} \
-              GOARCH=${{ matrix.go-arch }} \
-                go build -o build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/calculateSubnets \
-                  ./cmd/calculateSubnets/main.go
+      - name: Test with Go
+        run: go test -json ./... > TestResults-${{ matrix.go-version }}.json
 
-          - name: Create Debian/Ubuntu Package
-            run: |
-              cd build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
-              mkdir -p debian/DEBIAN
-              touch debian/DEBIAN/control
-              echo "Package: calculateSubnets" >> debian/DEBIAN/control
-              echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
-              echo "Architecture: ${{ matrix.go-arch }}" >> debian/DEBIAN/control
-              echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
-              echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
-              mkdir -p debian/usr/bin
-              cp calculateSubnets debian/usr/bin
-              dpkg-deb --build debian
-              cp debian.deb ../../../subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
-              ls ../../../
-              pwd
+      - name: Build with go
+        run: |
+          mkdir -p build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
+          GOOS=${{ matrix.go-opsys }} \
+          GOARCH=${{ matrix.go-arch }} \
+            go build -o build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/calculateSubnets \
+              ./cmd/calculateSubnets/main.go
 
-          - name: Set Release Version
-            id: set_version
-            run: |
-              echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.${{ matrix.go-version }}.$(date +%s)"
+      - name: Create Debian/Ubuntu Package
+        run: |
+          cd build/${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}/
+          mkdir -p debian/DEBIAN
+          touch debian/DEBIAN/control
+          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Version: ${{ matrix.go-version }}.$(date +%s)" >> debian/DEBIAN/control
+          echo "Architecture: ${{ matrix.go-arch }}" >> debian/DEBIAN/control
+          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
+          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
+          mkdir -p debian/usr/bin
+          cp calculateSubnets debian/usr/bin
+          dpkg-deb --build debian
+          cp debian.deb ../../../subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+          ls ../../../
+          pwd
 
-          - name: Create Release
-            id: create_release
-            uses: actions/create-release@v1
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
-              release_name: Release ${{ steps.set_version.outputs.version }}
-              body: |
-                This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
-              draft: false
-              prerelease: false
+      - name: Set Release Version
+        id: set_version
+        run: |
+          echo "::set-output name=version::${{ matrix.go-opsys }}/${{ matrix.go-arch }}.${{ matrix.go-version }}.$(date +%s)"
 
-          - name: Publish Artifact
-            uses: actions/upload-artifact@v2
-            with:
-              name: deb-package
-              path: subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
+          release_name: Release ${{ steps.set_version.outputs.version }}
+          body: |
+            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
+          draft: false
+          prerelease: false
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: subnetting-${{ format('v{0}', steps.set_version.outputs.version) }}.deb
