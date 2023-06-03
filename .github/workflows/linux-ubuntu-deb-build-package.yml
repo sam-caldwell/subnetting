@@ -1,3 +1,4 @@
+---
 name: Linux Ubuntu Debian Build and Package
 
 on:
@@ -12,6 +13,7 @@ env:
 jobs:
   pre-check-test:
     runs-on: ubuntu-latest
+    needs: run-all-tests
     strategy:
       matrix:
         go-version: [ '1.20' ]
@@ -35,6 +37,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs: run-all-tests
     strategy:
       matrix:
         go-version: [ '1.20' ]
@@ -74,14 +77,10 @@ jobs:
           mkdir -p debian/usr/bin
           cp calculateSubnets debian/usr/bin
           dpkg-deb --build debian
-          cp debian.deb ../../../subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}/${{ matrix.go-version }}.deb
+          cp debian.deb ../../../subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
           ls ../../../
           pwd
 
-  create-release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Set Release Version
         id: set_version
         run: |
@@ -89,4 +88,19 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses:
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ format('v{0}', steps.set_version.outputs.version) }}
+          release_name: Release ${{ steps.set_version.outputs.version }}
+          body: |
+            This is the release of calculateSubnets ${{ steps.set_version.outputs.version }}.
+          draft: false
+          prerelease: false
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Debian/Ubuntu Package ${{ matrix.go-arch }}/${{ matrix.go-version }}
+          path: subnetting-${{ matrix.go-opsys }}/${{ matrix.go-arch }}.$(date +%s)".deb
