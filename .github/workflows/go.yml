@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  GO111MODULE: "on"
+
 jobs:
 
   build:
@@ -41,10 +44,50 @@ jobs:
           mkdir -p build/linux/amd64/${{ matrix.go-version }}/
           GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
 
+      - name: Create Debian/Ubuntu Package
+        run: |
+          cd build/linux/amd64/${{ matrix.go-version }}
+          mkdir -p debian/DEBIAN
+          touch debian/DEBIAN/control
+          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Version: $(date +%Y).$(date +%s)" >> debian/DEBIAN/control
+          echo "Architecture: amd64" >> debian/DEBIAN/control
+          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
+          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
+          mkdir -p debian/usr/bin
+          cp calculateSubnets debian/usr/bin
+          dpkg-deb --build debian
+
+      - name: Publish Artifact (Ubuntu .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/amd64/${{ matrix.go-version }}/debian.deb
+
       - name: Build with go (linux arm64)
         run: |
           mkdir -p build/linux/arm64/${{ matrix.go-version }}/
           GOOS=linux GOARCH=arm64 go build -o build/linux/arm64/${{ matrix.go-version }}/calculateSubnets ./cmd/calculateSubnets/main.go
+
+      - name: Create Debian/Ubuntu Package
+        run: |
+          cd build/linux/arm64/${{ matrix.go-version }}
+          mkdir -p debian/DEBIAN
+          touch debian/DEBIAN/control
+          echo "Package: calculateSubnets" >> debian/DEBIAN/control
+          echo "Version: $(date +%Y).$(date +%s)" >> debian/DEBIAN/control
+          echo "Architecture: arm64" >> debian/DEBIAN/control
+          echo "Maintainer: Sam Caldwell <mail@samcaldwell.net>" >> debian/DEBIAN/control
+          echo "Description: calculateSubnets binary" >> debian/DEBIAN/control
+          mkdir -p debian/usr/bin
+          cp calculateSubnets debian/usr/bin
+          dpkg-deb --build debian
+
+      - name: Publish Artifact (Ubuntu .deb package)
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: build/linux/arm64/${{ matrix.go-version }}/debian.deb
 
       - name: Build with go (windows amd64)
         run: |
