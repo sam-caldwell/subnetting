@@ -10,9 +10,6 @@ lint:
 
 test: lint
 	go test -v -count=1 ./...
+
 build: clean
 	@go build -o build/calculateSubnets ./cmd/calculateSubnets/main.go
-
-
-test:
-	@go test -v ./...
